@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Arquivos BIN/CUE</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    
+    h1 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 2.2em;
+    }
+    
+    h2 {
+      font-size: 1.8em;
+      margin-top: 30px;
+    }
+    
+    .container {
+      margin-top: 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+    }
+    
+    .upload-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: #f0f7ff;
+      border-radius: 8px;
+    }
+    
+    .upload-section p {
+      font-size: 1.1em;
+      margin-bottom: 15px;
+    }
+    
+    #folder-input {
+      display: none;
+    }
+    
+    button {
+      padding: 12px 24px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 1em;
+      transition: background-color 0.2s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    .action-button {
+      padding: 8px 12px;
+      font-size: 0.9em;
+      margin: 3px;
+    }
+    
+    .download-bin {
+      background-color: #27ae60;
+    }
+    
+    .download-bin:hover {
+      background-color: #219653;
+    }
+    
+    .download-cue {
+      background-color: #f39c12;
+    }
+    
+    .download-cue:hover {
+      background-color: #d35400;
+    }
+    
+    .toggle-button {
+      background-color: #95a5a6;
+      padding: 5px 10px;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+    
+    .toggle-button:hover {
+      background-color: #7f8c8d;
+    }
+    
+    #progress-bar {
+      width: 100%;
+      height: 15px;
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .results-table th {
+      background-color: #3498db;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+    }
+    
+    .results-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .results-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    
+    .results-table tr:hover {
+      background-color: #e9f7fe;
+    }
+    
+    .status-success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    
+    .status-error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    
+    .status-pending {
+      color: #f39c12;
+      font-weight: bold;
+    }
+    
+    .status-processing {
+      color: #3498db;
+      font-weight: bold;
+    }
+    
+    .actions-cell {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    
+    .limitation-notice {
+      background-color: #fcf8e3;
+      border-left: 5px solid #f39c12;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .bin-files-list {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .bin-files-list ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .changes-summary {
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .changes-summary li {
+      margin-bottom: 8px;
+    }
+    
+    .no-games-message {
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f7ff;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      color: #2c3e50;
+    }
+    
+    .language-switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    
+    .language-label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    
+    .language-button {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 0 5px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      color: #333;
+    }
+    
+    .language-button:hover {
+      background-color: #e9ecef;
+    }
+    
+    .language-button.active {
+      background-color: #e9f7fe;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+    }
+    
+    .language-button .flag {
+      font-size: 1.5em;
+      margin-right: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .results-table th, .results-table td {
+        padding: 8px;
+        font-size: 0.9em;
+      }
+      
+      button {
+        padding: 10px 16px;
+      }
+      
+      .action-button {
+        padding: 6px 10px;
+        font-size: 0.8em;
+      }
+      
+      .language-button {
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="language-switch-container">
+    <span class="language-label" id="language-label">Idioma:</span>
+    <button id="pt-button" class="language-button active">
+      <span class="flag">🇧🇷</span>
+      PT
+    </button>
+    <button id="en-button" class="language-button">
+      <span class="flag">🇬🇧</span>
+      EN
+    </button>
+  </div>
+  
+  <h1 id="page-title">Gerenciador de Arquivos BIN/CUE</h1>
+  
+  <div class="limitation-notice" id="limitation-notice">
+    <strong>Limitação Importante:</strong> Devido a restrições de segurança dos navegadores, esta aplicação web não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituir os originais manualmente.
+  </div>
+  
+  <div class="container">
+    <div class="upload-section">
+      <p id="select-folder-text">Selecione a pasta raiz contendo as pastas de jogos :</p>
+      <input type="file" id="folder-input" webkitdirectory directory multiple>
+      <button id="process-button">Selecionar Pasta</button>
+    </div>
+    
+    <progress id="progress-bar" max="100" value="0"></progress>
+    
+    <div id="results-list"></div>
+    
+    <div id="instructions"></div>
+  </div>
+  
+  <script src="bundle.js"></script>
+</body>
+</html> 
