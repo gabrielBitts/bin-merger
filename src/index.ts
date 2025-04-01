@@ -1,12 +1,132 @@
 import { processGameFolders, ProcessedGame } from './fileProcessor';
 import { saveAs } from 'file-saver';
 
+// Elementos da interface
 let folderInput: HTMLInputElement;
 let processButton: HTMLButtonElement;
 let resultsList: HTMLDivElement;
 let progressBar: HTMLProgressElement;
 let instructionsDiv: HTMLDivElement;
+let ptButton: HTMLButtonElement;
+let enButton: HTMLButtonElement;
+let pageTitle: HTMLHeadingElement;
+let limitationNotice: HTMLDivElement;
+let selectFolderText: HTMLParagraphElement;
+let languageLabel: HTMLSpanElement;
 let processedGames: ProcessedGame[] = [];
+
+// Idioma atual
+let currentLanguage: 'pt' | 'en' = 'pt';
+
+// Traduções
+const translations = {
+  pt: {
+    title: 'Gerenciador de Arquivos BIN/CUE',
+    limitationNotice: '<strong>Limitação Importante:</strong> Devido a restrições de segurança dos navegadores, esta aplicação web não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituir os originais manualmente.',
+    selectFolder: 'Selecione a pasta raiz contendo as pastas de jogos :',
+    selectButton: 'Selecionar Pasta',
+    howToUseTitle: 'Como Usar Esta Ferramenta',
+    howToUseDescription: 'Esta ferramenta analisa suas pastas de jogos  e prepara arquivos BIN/CUE otimizados.',
+    importantNote: 'Importante:',
+    securityLimitation: 'Devido a restrições de segurança dos navegadores, esta ferramenta não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituí-los manualmente.',
+    step1: 'Clique em "Selecionar Pasta" e escolha a pasta raiz que contém suas pastas de jogos ',
+    step2: 'A ferramenta analisará todas as subpastas e processará os arquivos BIN/CUE automaticamente',
+    step3: 'Baixe os arquivos processados usando os botões "Baixar BIN"',
+    step4: 'Substitua manualmente os arquivos originais pelos processados',
+    note: 'Nota:',
+    singleBinNote: 'Jogos que já possuem apenas um arquivo BIN não serão listados, pois já estão otimizados.',
+    processing: 'Processando arquivos...',
+    noGamesFound: 'Nenhum jogo encontrado que precise de otimização. Todos os jogos já possuem apenas um arquivo BIN ou não foram encontrados jogos válidos.',
+    tableHeaders: ['Jogo', 'Pasta', 'Arquivos', 'Novo Nome', 'Status', 'Ações'],
+    downloadBin: 'Baixar BIN',
+    downloadCue: 'Baixar CUE',
+    statusTexts: {
+      pending: 'Pendente',
+      processing: 'Processando',
+      success: 'Sucesso',
+      error: 'Erro',
+      unknown: 'Desconhecido'
+    },
+    noOptimizationNeeded: 'Nenhum Jogo Precisa de Otimização',
+    allGamesOptimized: 'Todos os jogos encontrados já possuem apenas um arquivo BIN, ou nenhum jogo válido foi encontrado.',
+    checkIf: 'Se você esperava ver jogos na lista, verifique se:',
+    checkRoot: 'Você selecionou a pasta raiz correta que contém as pastas de jogos',
+    checkFiles: 'As pastas de jogos contêm arquivos BIN e CUE',
+    checkMultipleBins: 'Existem jogos com múltiplos arquivos BIN que precisam ser mesclados',
+    instructionsTitle: 'Instruções para Aplicar as Alterações',
+    gamesFound: 'Foram encontrados {0} jogos que precisam de otimização, dos quais {1} foram processados com sucesso.',
+    howToApply: 'Como aplicar as alterações:',
+    applyStep1: 'Baixe os arquivos individualmente usando os botões "Baixar BIN"',
+    applyStep2: 'Para cada jogo:',
+    applyStep2a: 'Navegue até a pasta original do jogo no seu sistema',
+    applyStep2b: 'Exclua todos os arquivos BIN originais',
+    applyStep2c: 'Coloque o novo arquivo BIN mesclado na pasta',
+    applyStep2d: 'Certifique-se de que o arquivo CUE aponta para o novo arquivo BIN',
+    changesSummary: 'Resumo das alterações:',
+    pendingCue: '(Pendente: CUE não encontrado)',
+    errorProcessing: 'Erro ao processar as pastas:',
+    none: 'Nenhum',
+    na: 'N/A',
+    language: 'Idioma:',
+    portuguese: 'Português',
+    english: 'Inglês',
+    showDetails: 'Mostrar detalhes',
+    hideDetails: 'Ocultar detalhes'
+  },
+  en: {
+    title: 'BIN/CUE File Manager',
+    limitationNotice: '<strong>Important Limitation:</strong> Due to browser security restrictions, this web application cannot modify files directly on your system. You will need to download the processed files and replace the originals manually.',
+    selectFolder: 'Select the root folder containing game folders:',
+    selectButton: 'Select Folder',
+    howToUseTitle: 'How to Use This Tool',
+    howToUseDescription: 'This tool analyzes your game folders and prepares optimized BIN/CUE files.',
+    importantNote: 'Important:',
+    securityLimitation: 'Due to browser security restrictions, this tool cannot modify files directly on your system. You will need to download the processed files and replace them manually.',
+    step1: 'Click on "Select Folder" and choose the root folder that contains your game folders',
+    step2: 'The tool will analyze all subfolders and process BIN/CUE files automatically',
+    step3: 'Download the processed files using the "Download BIN" buttons',
+    step4: 'Manually replace the original files with the processed ones',
+    note: 'Note:',
+    singleBinNote: 'Games that already have only one BIN file will not be listed, as they are already optimized.',
+    processing: 'Processing files...',
+    noGamesFound: 'No games found that need optimization. All games already have only one BIN file or no valid games were found.',
+    tableHeaders: ['Game', 'Folder', 'Files', 'New Name', 'Status', 'Actions'],
+    downloadBin: 'Download BIN',
+    downloadCue: 'Download CUE',
+    statusTexts: {
+      pending: 'Pending',
+      processing: 'Processing',
+      success: 'Success',
+      error: 'Error',
+      unknown: 'Unknown'
+    },
+    noOptimizationNeeded: 'No Games Need Optimization',
+    allGamesOptimized: 'All games found already have only one BIN file, or no valid games were found.',
+    checkIf: 'If you expected to see games in the list, check if:',
+    checkRoot: 'You selected the correct root folder that contains the game folders',
+    checkFiles: 'The game folders contain BIN and CUE files',
+    checkMultipleBins: 'There are games with multiple BIN files that need to be merged',
+    instructionsTitle: 'Instructions to Apply Changes',
+    gamesFound: 'Found {0} games that need optimization, of which {1} were successfully processed.',
+    howToApply: 'How to apply the changes:',
+    applyStep1: 'Download the files individually using the "Download BIN" buttons',
+    applyStep2: 'For each game:',
+    applyStep2a: 'Navigate to the original game folder on your system',
+    applyStep2b: 'Delete all original BIN files',
+    applyStep2c: 'Place the new merged BIN file in the folder',
+    applyStep2d: 'Make sure the CUE file points to the new BIN file',
+    changesSummary: 'Summary of changes:',
+    pendingCue: '(Pending: No CUE file found)',
+    errorProcessing: 'Error processing folders:',
+    none: 'None',
+    na: 'N/A',
+    language: 'Language:',
+    portuguese: 'Portuguese',
+    english: 'English',
+    showDetails: 'Show details',
+    hideDetails: 'Hide details'
+  }
+};
 
 // Inicializa a aplicação quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,6 +142,12 @@ function initializeUI() {
   resultsList = document.getElementById('results-list') as HTMLDivElement;
   progressBar = document.getElementById('progress-bar') as HTMLProgressElement;
   instructionsDiv = document.getElementById('instructions') as HTMLDivElement;
+  ptButton = document.getElementById('pt-button') as HTMLButtonElement;
+  enButton = document.getElementById('en-button') as HTMLButtonElement;
+  pageTitle = document.getElementById('page-title') as HTMLHeadingElement;
+  limitationNotice = document.getElementById('limitation-notice') as HTMLDivElement;
+  selectFolderText = document.getElementById('select-folder-text') as HTMLParagraphElement;
+  languageLabel = document.getElementById('language-label') as HTMLSpanElement;
   
   // Esconde a barra de progresso inicialmente
   progressBar.style.display = 'none';
@@ -38,21 +164,67 @@ function setupEventListeners() {
   
   // Processa os arquivos assim que forem selecionados
   folderInput.addEventListener('change', handleFolderSelection);
+  
+  // Configura os botões de idioma
+  ptButton.addEventListener('click', () => {
+    if (currentLanguage !== 'pt') {
+      currentLanguage = 'pt';
+      updateLanguage();
+      ptButton.classList.add('active');
+      enButton.classList.remove('active');
+    }
+  });
+  
+  enButton.addEventListener('click', () => {
+    if (currentLanguage !== 'en') {
+      currentLanguage = 'en';
+      updateLanguage();
+      enButton.classList.add('active');
+      ptButton.classList.remove('active');
+    }
+  });
+}
+
+// Atualiza o idioma da interface
+function updateLanguage() {
+  const t = translations[currentLanguage];
+  
+  // Atualiza os elementos estáticos
+  document.title = t.title;
+  pageTitle.textContent = t.title;
+  limitationNotice.innerHTML = t.limitationNotice;
+  selectFolderText.textContent = t.selectFolder;
+  processButton.textContent = t.selectButton;
+  languageLabel.textContent = t.language;
+  
+  // Atualiza as instruções
+  if (processedGames.length > 0) {
+    showProcessingInstructions(processedGames);
+  } else {
+    showInitialInstructions();
+  }
+  
+  // Atualiza a tabela de resultados se houver
+  if (resultsList.children.length > 0) {
+    updateResultsUI(processedGames);
+  }
 }
 
 // Mostra instruções iniciais
 function showInitialInstructions() {
+  const t = translations[currentLanguage];
+  
   instructionsDiv.innerHTML = `
-    <h2>Como Usar Esta Ferramenta</h2>
-    <p>Esta ferramenta analisa suas pastas de jogos e prepara arquivos BIN/CUE otimizados.</p>
-    <p><strong>Importante:</strong> Devido a restrições de segurança dos navegadores, esta ferramenta não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituí-los manualmente.</p>
+    <h2>${t.howToUseTitle}</h2>
+    <p>${t.howToUseDescription}</p>
+    <p><strong>${t.importantNote}</strong> ${t.securityLimitation}</p>
     <ol>
-      <li>Clique em "Selecionar Pasta" e escolha a pasta raiz que contém suas pastas de jogos</li>
-      <li>A ferramenta analisará todas as subpastas e processará os arquivos BIN/CUE automaticamente</li>
-      <li>Baixe os arquivos processados usando os botões "Baixar BIN"</li>
-      <li>Substitua manualmente os arquivos originais pelos processados</li>
+      <li>${t.step1}</li>
+      <li>${t.step2}</li>
+      <li>${t.step3}</li>
+      <li>${t.step4}</li>
     </ol>
-    <p><strong>Nota:</strong> Jogos que já possuem apenas um arquivo BIN não serão listados, pois já estão otimizados.</p>
+    <p><strong>${t.note}</strong> ${t.singleBinNote}</p>
   `;
 }
 
@@ -73,7 +245,8 @@ async function handleFolderSelection(event: Event) {
   progressBar.value = 0;
   
   // Limpa as instruções anteriores
-  instructionsDiv.innerHTML = '<p>Processando arquivos...</p>';
+  const t = translations[currentLanguage];
+  instructionsDiv.innerHTML = `<p>${t.processing}</p>`;
   
   try {
     console.log(`Total de arquivos selecionados: ${input.files.length}`);
@@ -90,8 +263,9 @@ async function handleFolderSelection(event: Event) {
     showProcessingInstructions(processedGames);
   } catch (error) {
     console.error('Erro ao processar as pastas:', error);
-    alert(`Erro ao processar as pastas: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-    instructionsDiv.innerHTML = `<p class="error">Erro ao processar as pastas: ${error instanceof Error ? error.message : 'Erro desconhecido'}</p>`;
+    const errorMessage = `${t.errorProcessing} ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
+    alert(errorMessage);
+    instructionsDiv.innerHTML = `<p class="error">${errorMessage}</p>`;
   } finally {
     // Esconde a barra de progresso
     progressBar.style.display = 'none';
@@ -104,9 +278,12 @@ function updateResultsUI(games: ProcessedGame[]) {
   resultsList.innerHTML = '';
   
   if (games.length === 0) {
-    resultsList.innerHTML = '<p class="no-games-message">Nenhum jogo encontrado que precise de otimização. Todos os jogos já possuem apenas um arquivo BIN ou não foram encontrados jogos válidos.</p>';
+    const t = translations[currentLanguage];
+    resultsList.innerHTML = `<div class="no-games-message">${t.noGamesFound}</div>`;
     return;
   }
+  
+  const t = translations[currentLanguage];
   
   // Cria a tabela de resultados
   const table = document.createElement('table');
@@ -116,9 +293,9 @@ function updateResultsUI(games: ProcessedGame[]) {
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
   
-  ['Jogo', 'Pasta', 'Arquivos', 'Novo Nome', 'Status', 'Ações'].forEach(text => {
+  t.tableHeaders.forEach(headerText => {
     const th = document.createElement('th');
-    th.textContent = text;
+    th.textContent = headerText;
     headerRow.appendChild(th);
   });
   
@@ -131,36 +308,35 @@ function updateResultsUI(games: ProcessedGame[]) {
   games.forEach(game => {
     const row = document.createElement('tr');
     
-    // Coluna: Nome do jogo
+    // Coluna do nome do jogo
     const nameCell = document.createElement('td');
     nameCell.textContent = game.name;
     row.appendChild(nameCell);
     
-    // Coluna: Pasta
+    // Coluna da pasta original
     const folderCell = document.createElement('td');
     folderCell.textContent = game.originalFolder;
     row.appendChild(folderCell);
     
-    // Coluna: Arquivos BIN
-    const binFilesCell = document.createElement('td');
+    // Coluna dos arquivos BIN
+    const filesCell = document.createElement('td');
+    
     if (game.binFiles.length > 0) {
-      const countSpan = document.createElement('span');
-      countSpan.textContent = `${game.binFiles.length} arquivo(s)`;
-      binFilesCell.appendChild(countSpan);
+      const fileCount = document.createElement('span');
+      fileCount.textContent = `${game.binFiles.length} ${currentLanguage === 'pt' ? 'arquivo(s)' : 'file(s)'}`;
+      filesCell.appendChild(fileCount);
       
-      if (game.binFiles.length > 1) {
+      if (game.binFiles.length > 0) {
         const toggleButton = document.createElement('button');
-        toggleButton.textContent = 'Mostrar detalhes';
+        toggleButton.textContent = t.showDetails;
         toggleButton.className = 'toggle-button';
-        binFilesCell.appendChild(toggleButton);
+        filesCell.appendChild(toggleButton);
         
         const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'bin-files-details';
-        (detailsDiv as HTMLElement).style.display = 'none';
+        detailsDiv.className = 'file-details';
+        detailsDiv.style.display = 'none';
         
         const filesList = document.createElement('ul');
-        filesList.className = 'bin-files-list';
-        
         game.binFiles.forEach(file => {
           const listItem = document.createElement('li');
           listItem.textContent = file.name;
@@ -168,77 +344,43 @@ function updateResultsUI(games: ProcessedGame[]) {
         });
         
         detailsDiv.appendChild(filesList);
-        binFilesCell.appendChild(detailsDiv);
+        filesCell.appendChild(detailsDiv);
         
         toggleButton.addEventListener('click', () => {
-          // Usar HTMLElement para garantir que style exista
           const details = detailsDiv as HTMLElement;
           if (details.style.display === 'none') {
             details.style.display = 'block';
-            toggleButton.textContent = 'Ocultar detalhes';
+            toggleButton.textContent = t.hideDetails;
           } else {
             details.style.display = 'none';
-            toggleButton.textContent = 'Mostrar detalhes';
+            toggleButton.textContent = t.showDetails;
           }
         });
       }
     } else {
-      binFilesCell.textContent = 'Nenhum';
+      filesCell.textContent = t.none;
     }
-    row.appendChild(binFilesCell);
     
-    // Coluna: Novo Nome BIN
-    const binNameCell = document.createElement('td');
-    if (game.binFileName) {
-      binNameCell.textContent = game.binFileName;
-      binNameCell.className = 'new-bin-name';
-    } else {
-      binNameCell.textContent = 'N/A';
-    }
-    row.appendChild(binNameCell);
+    row.appendChild(filesCell);
     
-    // Coluna: Status
+    // Coluna do novo nome do arquivo BIN
+    const newNameCell = document.createElement('td');
+    newNameCell.textContent = game.binFileName || t.na;
+    row.appendChild(newNameCell);
+    
+    // Coluna do status
     const statusCell = document.createElement('td');
-    statusCell.className = `status-cell status-${game.status}`;
-    
-    const statusIcon = document.createElement('span');
-    statusIcon.className = 'status-icon';
-    switch (game.status) {
-      case 'success':
-        statusIcon.innerHTML = '✅';
-        break;
-      case 'error':
-        statusIcon.innerHTML = '❌';
-        break;
-      case 'pending':
-        statusIcon.innerHTML = '⚠️';
-        break;
-      default:
-        statusIcon.innerHTML = '🔄';
-    }
-    statusCell.appendChild(statusIcon);
-    
-    const statusText = document.createElement('span');
-    statusText.className = 'status-text';
-    statusText.textContent = getStatusText(game.status);
-    statusCell.appendChild(statusText);
-    
-    if (game.message) {
-      const statusMessage = document.createElement('div');
-      statusMessage.className = 'status-message';
-      statusMessage.textContent = game.message;
-      statusCell.appendChild(statusMessage);
-    }
-    
+    statusCell.textContent = getStatusText(game.status);
+    statusCell.className = `status-${game.status}`;
     row.appendChild(statusCell);
     
-    // Coluna: Ações
+    // Coluna das ações
     const actionsCell = document.createElement('td');
     actionsCell.className = 'actions-cell';
     
     if (game.status !== 'error' && game.binFile.size > 0) {
       const downloadButton = document.createElement('button');
-      downloadButton.textContent = 'Baixar BIN';
+      downloadButton.textContent = t.downloadBin;
       downloadButton.className = 'action-button download-bin';
       downloadButton.addEventListener('click', () => {
         saveAs(game.binFile, game.binFileName);
@@ -247,7 +389,7 @@ function updateResultsUI(games: ProcessedGame[]) {
       
       if (game.cueFile) {
         const downloadCueButton = document.createElement('button');
-        downloadCueButton.textContent = 'Baixar CUE';
+        downloadCueButton.textContent = t.downloadCue;
         downloadCueButton.className = 'action-button download-cue';
         downloadCueButton.addEventListener('click', () => {
           saveAs(game.cueFile as Blob, game.cueFile?.name);
@@ -267,54 +409,57 @@ function updateResultsUI(games: ProcessedGame[]) {
 
 // Obtém o texto do status
 function getStatusText(status: 'pending' | 'processing' | 'success' | 'error'): string {
+  const t = translations[currentLanguage].statusTexts;
+  
   switch (status) {
-    case 'pending': return 'Pendente';
-    case 'processing': return 'Processando';
-    case 'success': return 'Sucesso';
-    case 'error': return 'Erro';
-    default: return 'Desconhecido';
+    case 'pending': return t.pending;
+    case 'processing': return t.processing;
+    case 'success': return t.success;
+    case 'error': return t.error;
+    default: return t.unknown;
   }
 }
 
 // Mostra instruções para o usuário após o processamento
 function showProcessingInstructions(games: ProcessedGame[]) {
+  const t = translations[currentLanguage];
   const successGames = games.filter(g => g.status === 'success' || g.status === 'pending');
   
   if (games.length === 0) {
     instructionsDiv.innerHTML = `
-      <h2>Nenhum Jogo Precisa de Otimização</h2>
-      <p>Todos os jogos encontrados já possuem apenas um arquivo BIN, ou nenhum jogo válido foi encontrado.</p>
-      <p>Se você esperava ver jogos na lista, verifique se:</p>
+      <h2>${t.noOptimizationNeeded}</h2>
+      <p>${t.allGamesOptimized}</p>
+      <p>${t.checkIf}</p>
       <ul>
-        <li>Você selecionou a pasta raiz correta que contém as pastas de jogos</li>
-        <li>As pastas de jogos contêm arquivos BIN e CUE</li>
-        <li>Existem jogos com múltiplos arquivos BIN que precisam ser mesclados</li>
+        <li>${t.checkRoot}</li>
+        <li>${t.checkFiles}</li>
+        <li>${t.checkMultipleBins}</li>
       </ul>
     `;
     return;
   }
   
   instructionsDiv.innerHTML = `
-    <h2>Instruções para Aplicar as Alterações</h2>
-    <p>Foram encontrados ${games.length} jogos que precisam de otimização, dos quais ${successGames.length} foram processados com sucesso.</p>
-    <p><strong>Como aplicar as alterações:</strong></p>
+    <h2>${t.instructionsTitle}</h2>
+    <p>${t.gamesFound.replace('{0}', games.length.toString()).replace('{1}', successGames.length.toString())}</p>
+    <p><strong>${t.howToApply}</strong></p>
     <ol>
-      <li>Baixe os arquivos individualmente usando os botões "Baixar BIN"</li>
-      <li>Para cada jogo:</li>
+      <li>${t.applyStep1}</li>
+      <li>${t.applyStep2}</li>
       <ul>
-        <li>Navegue até a pasta original do jogo no seu sistema</li>
-        <li>Exclua todos os arquivos BIN originais</li>
-        <li>Coloque o novo arquivo BIN mesclado na pasta</li>
-        <li>Certifique-se de que o arquivo CUE aponta para o novo arquivo BIN</li>
+        <li>${t.applyStep2a}</li>
+        <li>${t.applyStep2b}</li>
+        <li>${t.applyStep2c}</li>
+        <li>${t.applyStep2d}</li>
       </ul>
     </ol>
-    <p><strong>Resumo das alterações:</strong></p>
+    <p><strong>${t.changesSummary}</strong></p>
     <ul class="changes-summary">
       ${successGames.map(game => 
         `<li>
           <strong>${game.originalFolder}:</strong> 
-          ${game.binFiles.length} arquivo(s) BIN → ${game.binFileName} 
-          ${game.status === 'pending' ? '(Pendente: CUE não encontrado)' : ''}
+          ${game.binFiles.length} ${currentLanguage === 'pt' ? 'arquivo(s) BIN' : 'BIN file(s)'} → ${game.binFileName} 
+          ${game.status === 'pending' ? t.pendingCue : ''}
         </li>`
       ).join('')}
     </ul>

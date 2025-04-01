@@ -109,125 +109,61 @@
       width: 100%;
       height: 15px;
       margin: 20px 0;
-      border-radius: 10px;
+      display: none;
     }
     
     .results-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .results-table th, .results-table td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
     
     .results-table th {
       background-color: #3498db;
       color: white;
+      padding: 12px;
+      text-align: left;
       font-weight: bold;
-      text-transform: uppercase;
-      font-size: 0.9em;
-      letter-spacing: 0.5px;
+    }
+    
+    .results-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
     }
     
     .results-table tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f8f9fa;
     }
     
     .results-table tr:hover {
-      background-color: #f0f7ff;
-    }
-    
-    .bin-files-details {
-      margin-top: 10px;
-      max-height: 150px;
-      overflow-y: auto;
-      background-color: #f8f9fa;
-      border-radius: 4px;
-      padding: 8px;
-      border: 1px solid #e0e0e0;
-    }
-    
-    .bin-files-list {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 0.9em;
-    }
-    
-    .bin-files-list li {
-      margin-bottom: 4px;
-    }
-    
-    .new-bin-name {
-      font-weight: bold;
-      color: #2980b9;
-    }
-    
-    .status-cell {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .status-icon {
-      font-size: 1.2em;
-      margin-right: 5px;
-    }
-    
-    .status-text {
-      font-weight: bold;
-      margin-top: 3px;
+      background-color: #e9f7fe;
     }
     
     .status-success {
       color: #27ae60;
+      font-weight: bold;
     }
     
     .status-error {
       color: #e74c3c;
+      font-weight: bold;
     }
     
     .status-pending {
       color: #f39c12;
+      font-weight: bold;
     }
     
     .status-processing {
       color: #3498db;
-    }
-    
-    .status-message {
-      font-size: 0.85em;
-      margin-top: 5px;
-      color: #7f8c8d;
+      font-weight: bold;
     }
     
     .actions-cell {
-      text-align: center;
-    }
-    
-    #instructions {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #f0f7ff;
-      border: 1px solid #d1e3fa;
-      border-radius: 8px;
-      line-height: 1.6;
-    }
-    
-    .limitation-notice {
-      background-color: #fff3cd;
-      border: 1px solid #ffeeba;
-      color: #856404;
-      padding: 15px;
-      margin: 20px 0;
-      border-radius: 8px;
-      font-size: 1.05em;
-      line-height: 1.5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
     }
     
     .error {
@@ -235,13 +171,36 @@
       font-weight: bold;
     }
     
-    .changes-summary {
-      max-height: 300px;
+    .limitation-notice {
+      background-color: #fcf8e3;
+      border-left: 5px solid #f39c12;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .bin-files-list {
+      max-height: 150px;
       overflow-y: auto;
+      margin-top: 10px;
+      padding: 10px;
       background-color: #f8f9fa;
       border-radius: 4px;
-      padding: 10px;
-      border: 1px solid #e0e0e0;
+      border: 1px solid #ddd;
+    }
+    
+    .bin-files-list ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .changes-summary {
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
     }
     
     .changes-summary li {
@@ -258,6 +217,47 @@
       color: #2c3e50;
     }
     
+    .language-switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    
+    .language-label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    
+    .language-button {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 0 5px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      color: #333;
+    }
+    
+    .language-button:hover {
+      background-color: #e9ecef;
+    }
+    
+    .language-button.active {
+      background-color: #e9f7fe;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+    }
+    
+    .language-button .flag {
+      font-size: 1.5em;
+      margin-right: 8px;
+    }
+    
     @media (max-width: 768px) {
       .results-table th, .results-table td {
         padding: 8px;
@@ -272,19 +272,35 @@
         padding: 6px 10px;
         font-size: 0.8em;
       }
+      
+      .language-button {
+        padding: 6px 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Gerenciador de Arquivos BIN/CUE</h1>
+  <div class="language-switch-container">
+    <span class="language-label" id="language-label">Idioma:</span>
+    <button id="pt-button" class="language-button active">
+      <span class="flag">🇧🇷</span>
+      PT
+    </button>
+    <button id="en-button" class="language-button">
+      <span class="flag">🇬🇧</span>
+      EN
+    </button>
+  </div>
   
-  <div class="limitation-notice">
+  <h1 id="page-title">Gerenciador de Arquivos BIN/CUE</h1>
+  
+  <div class="limitation-notice" id="limitation-notice">
     <strong>Limitação Importante:</strong> Devido a restrições de segurança dos navegadores, esta aplicação web não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituir os originais manualmente.
   </div>
   
   <div class="container">
     <div class="upload-section">
-      <p>Selecione a pasta raiz contendo as pastas de jogos:</p>
+      <p id="select-folder-text">Selecione a pasta raiz contendo as pastas de jogos :</p>
       <input type="file" id="folder-input" webkitdirectory directory multiple>
       <button id="process-button">Selecionar Pasta</button>
     </div>
