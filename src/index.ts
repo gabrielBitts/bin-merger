@@ -1,7 +1,6 @@
 import { processGameFolders, ProcessedGame } from './fileProcessor';
 import { saveAs } from 'file-saver';
 
-// Elementos da interface
 let folderInput: HTMLInputElement;
 let processButton: HTMLButtonElement;
 let resultsList: HTMLDivElement;
@@ -53,6 +52,7 @@ function showInitialInstructions() {
       <li>Baixe os arquivos processados usando os botões "Baixar BIN"</li>
       <li>Substitua manualmente os arquivos originais pelos processados</li>
     </ol>
+    <p><strong>Nota:</strong> Jogos que já possuem apenas um arquivo BIN não serão listados, pois já estão otimizados.</p>
   `;
 }
 
@@ -104,7 +104,7 @@ function updateResultsUI(games: ProcessedGame[]) {
   resultsList.innerHTML = '';
   
   if (games.length === 0) {
-    resultsList.innerHTML = '<p>Nenhum jogo encontrado nas subpastas. Certifique-se de selecionar a pasta raiz que contém as pastas de jogos.</p>';
+    resultsList.innerHTML = '<p class="no-games-message">Nenhum jogo encontrado que precise de otimização. Todos os jogos já possuem apenas um arquivo BIN ou não foram encontrados jogos válidos.</p>';
     return;
   }
   
@@ -155,11 +155,12 @@ function updateResultsUI(games: ProcessedGame[]) {
         binFilesCell.appendChild(toggleButton);
         
         const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'bin-details';
-        // Usar HTMLElement para garantir que style exista
+        detailsDiv.className = 'bin-files-details';
         (detailsDiv as HTMLElement).style.display = 'none';
         
         const filesList = document.createElement('ul');
+        filesList.className = 'bin-files-list';
+        
         game.binFiles.forEach(file => {
           const listItem = document.createElement('li');
           listItem.textContent = file.name;
@@ -279,9 +280,23 @@ function getStatusText(status: 'pending' | 'processing' | 'success' | 'error'): 
 function showProcessingInstructions(games: ProcessedGame[]) {
   const successGames = games.filter(g => g.status === 'success' || g.status === 'pending');
   
+  if (games.length === 0) {
+    instructionsDiv.innerHTML = `
+      <h2>Nenhum Jogo Precisa de Otimização</h2>
+      <p>Todos os jogos encontrados já possuem apenas um arquivo BIN, ou nenhum jogo válido foi encontrado.</p>
+      <p>Se você esperava ver jogos na lista, verifique se:</p>
+      <ul>
+        <li>Você selecionou a pasta raiz correta que contém as pastas de jogos</li>
+        <li>As pastas de jogos contêm arquivos BIN e CUE</li>
+        <li>Existem jogos com múltiplos arquivos BIN que precisam ser mesclados</li>
+      </ul>
+    `;
+    return;
+  }
+  
   instructionsDiv.innerHTML = `
     <h2>Instruções para Aplicar as Alterações</h2>
-    <p>Foram encontrados ${games.length} jogos, dos quais ${successGames.length} foram processados com sucesso.</p>
+    <p>Foram encontrados ${games.length} jogos que precisam de otimização, dos quais ${successGames.length} foram processados com sucesso.</p>
     <p><strong>Como aplicar as alterações:</strong></p>
     <ol>
       <li>Baixe os arquivos individualmente usando os botões "Baixar BIN"</li>

@@ -122,7 +122,7 @@
     }
     
     .results-table th, .results-table td {
-      border: 1px solid #e0e0e0;
+      border: 1px solid #ddd;
       padding: 12px;
       text-align: left;
     }
@@ -130,28 +130,23 @@
     .results-table th {
       background-color: #3498db;
       color: white;
-      font-weight: 600;
+      font-weight: bold;
       text-transform: uppercase;
       font-size: 0.9em;
       letter-spacing: 0.5px;
     }
     
     .results-table tr:nth-child(even) {
-      background-color: #f5f9fc;
+      background-color: #f9f9f9;
     }
     
     .results-table tr:hover {
-      background-color: #ecf0f1;
+      background-color: #f0f7ff;
     }
     
-    .bin-count {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .bin-details {
+    .bin-files-details {
       margin-top: 10px;
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
       background-color: #f8f9fa;
       border-radius: 4px;
@@ -159,15 +154,14 @@
       border: 1px solid #e0e0e0;
     }
     
-    .bin-details ul {
+    .bin-files-list {
       margin: 0;
       padding-left: 20px;
+      font-size: 0.9em;
     }
     
-    .bin-details li {
-      font-size: 0.9em;
-      margin-bottom: 3px;
-      word-break: break-all;
+    .bin-files-list li {
+      margin-bottom: 4px;
     }
     
     .new-bin-name {
@@ -252,6 +246,16 @@
     
     .changes-summary li {
       margin-bottom: 8px;
+    }
+    
+    .no-games-message {
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f7ff;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      color: #2c3e50;
     }
     
     @media (max-width: 768px) {

@@ -18,89 +18,86 @@ export interface ProcessedGame {
 /**
  * Processa uma pasta de jogo contendo arquivos BIN e CUE
  */
-export async function processGameFolder(folderName: string, files: File[]): Promise<ProcessedGame> {
+export async function processGameFolder(folderName: string, files: File[]): Promise<ProcessedGame | null> {
   try {
     // Filtra os arquivos BIN e CUE
     const binFiles = files.filter(file => hasExtension(file.name, 'bin'));
     const cueFile = findCueFile(files);
     
+    // Se não houver arquivos BIN, retorna null
     if (binFiles.length === 0) {
-      return {
-        name: folderName,
-        binFile: new Blob(),
-        binFileName: '',
-        cueFile: null,
-        originalFolder: folderName,
-        status: 'error',
-        message: 'Nenhum arquivo BIN encontrado na pasta',
-        binFiles: []
-      };
+      return null;
+    }
+    
+    // Se houver apenas um arquivo BIN, não precisamos processá-lo
+    if (binFiles.length === 1) {
+      return null;
     }
     
     // Ordena os arquivos BIN
     const sortedBinFiles = sortBinFiles(binFiles);
     
+    // Nome base para o arquivo BIN mesclado
+    const baseName = getBaseName(folderName);
+    const binFileName = `${baseName}.bin`;
+    
     // Mescla os arquivos BIN
-    const mergedBin = await mergeBinFiles(sortedBinFiles);
+    const mergedBinFile = await mergeBinFiles(sortedBinFiles);
     
-    // Determina o nome do arquivo BIN mesclado
-    let binFileName: string;
-    let status: 'pending' | 'processing' | 'success' | 'error' = 'success';
-    let message = '';
-    
-    if (cueFile) {
-      // Usa o nome do arquivo CUE para o arquivo BIN
-      binFileName = `${getBaseName(cueFile.name)}.bin`;
-      message = binFiles.length > 1 
-        ? `${binFiles.length} arquivos BIN mesclados e renomeados para ${binFileName}` 
-        : `Arquivo BIN renomeado para ${binFileName}`;
-    } else {
-      // Usa o nome da pasta
-      binFileName = `${folderName}.bin`;
-      status = 'pending';
-      message = 'Arquivo CUE não encontrado. Usando nome da pasta.';
-    }
-    
-    return {
-      name: cueFile ? getBaseName(cueFile.name) : folderName,
-      binFile: mergedBin,
+    // Cria o objeto de jogo processado
+    const processedGame: ProcessedGame = {
+      name: baseName,
+      binFile: mergedBinFile,
       binFileName,
       cueFile,
       originalFolder: folderName,
-      status,
-      message,
+      status: 'success',
+      message: `${sortedBinFiles.length} arquivos BIN mesclados com sucesso.`,
       binFiles: sortedBinFiles
     };
+    
+    // Se não houver arquivo CUE, marca como pendente
+    if (!cueFile) {
+      processedGame.status = 'pending';
+      processedGame.message = 'Arquivos BIN mesclados, mas nenhum arquivo CUE encontrado.';
+    }
+    
+    return processedGame;
   } catch (error) {
     console.error(`Erro ao processar a pasta ${folderName}:`, error);
+    
+    // Retorna um objeto de jogo com status de erro
     return {
-      name: folderName,
-      binFile: new Blob(),
+      name: getBaseName(folderName),
+      binFile: new Blob([]),
       binFileName: '',
       cueFile: null,
       originalFolder: folderName,
       status: 'error',
-      message: error instanceof Error ? error.message : 'Erro desconhecido',
+      message: `Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
       binFiles: []
     };
   }
 }
 
 /**
- * Processa múltiplas pastas de jogos
+ * Processa várias pastas de jogos
  */
-export async function processGameFolders(fileList: FileList): Promise<ProcessedGame[]> {
-  // Agrupa os arquivos por pasta de jogo (diretório de primeiro nível)
+export async function processGameFolders(files: FileList): Promise<ProcessedGame[]> {
+  // Mapeia os arquivos para suas pastas
   const folderMap = new Map<string, File[]>();
   
-  for (let i = 0; i < fileList.length; i++) {
-    const file = fileList[i];
-    const pathParts = file.webkitRelativePath.split('/');
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const path = file.webkitRelativePath || '';
+    const pathParts = path.split('/');
     
     // Ignora arquivos na raiz
-    if (pathParts.length < 2) continue;
+    if (pathParts.length <= 1) {
+      continue;
+    }
     
-    // Obtém o nome da pasta de jogo (primeiro nível após a raiz)
+    // Obtém o nome da pasta do jogo (primeiro nível após a raiz)
     const gameFolderName = pathParts[1];
     
     // Se o arquivo estiver em uma subpasta de jogo
@@ -122,7 +119,9 @@ export async function processGameFolders(fileList: FileList): Promise<ProcessedG
   
   for (const [folderName, files] of folderMap.entries()) {
     const processedGame = await processGameFolder(folderName, files);
-    processedGames.push(processedGame);
+    if (processedGame) {
+      processedGames.push(processedGame);
+    }
   }
   
   return processedGames;
