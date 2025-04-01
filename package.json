@@ -1,7 +1,7 @@
 {
-  "name": "saturn-bin-manager",
+  "name": "bin-merger",
   "version": "1.0.0",
-  "description": "Ferramenta para gerenciar arquivos BIN/CUE do Saturn",
+  "description": "Ferramenta para gerenciar arquivos BIN/CUE",
   "main": "dist/index.js",
   "scripts": {
     "start": "webpack serve --mode development",
@@ -9,7 +9,6 @@
     "dev": "webpack serve --mode development"
   },
   "keywords": [
-    "saturn",
     "bin",
     "cue",
     "merge"

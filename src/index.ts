@@ -45,10 +45,10 @@ function setupEventListeners() {
 function showInitialInstructions() {
   instructionsDiv.innerHTML = `
     <h2>Como Usar Esta Ferramenta</h2>
-    <p>Esta ferramenta analisa suas pastas de jogos do Saturn e prepara arquivos BIN/CUE otimizados.</p>
+    <p>Esta ferramenta analisa suas pastas de jogos e prepara arquivos BIN/CUE otimizados.</p>
     <p><strong>Importante:</strong> Devido a restrições de segurança dos navegadores, esta ferramenta não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituí-los manualmente.</p>
     <ol>
-      <li>Clique em "Selecionar Pasta" e escolha a pasta raiz que contém suas pastas de jogos do Saturn</li>
+      <li>Clique em "Selecionar Pasta" e escolha a pasta raiz que contém suas pastas de jogos</li>
       <li>A ferramenta analisará todas as subpastas e processará os arquivos BIN/CUE automaticamente</li>
       <li>Baixe os arquivos processados usando os botões "Baixar BIN"</li>
       <li>Substitua manualmente os arquivos originais pelos processados</li>
@@ -116,7 +116,7 @@ function updateResultsUI(games: ProcessedGame[]) {
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
   
-  ['Jogo', 'Pasta', 'Arquivos BIN', 'Novo Nome BIN', 'Status', 'Ações'].forEach(text => {
+  ['Jogo', 'Pasta', 'Arquivos', 'Novo Nome', 'Status', 'Ações'].forEach(text => {
     const th = document.createElement('th');
     th.textContent = text;
     headerRow.appendChild(th);
@@ -143,33 +143,102 @@ function updateResultsUI(games: ProcessedGame[]) {
     
     // Coluna: Arquivos BIN
     const binFilesCell = document.createElement('td');
-    binFilesCell.textContent = game.binFiles.length > 0 
-      ? game.binFiles.map(f => f.name).join(', ') 
-      : 'Nenhum';
+    if (game.binFiles.length > 0) {
+      const countSpan = document.createElement('span');
+      countSpan.textContent = `${game.binFiles.length} arquivo(s)`;
+      binFilesCell.appendChild(countSpan);
+      
+      if (game.binFiles.length > 1) {
+        const toggleButton = document.createElement('button');
+        toggleButton.textContent = 'Mostrar detalhes';
+        toggleButton.className = 'toggle-button';
+        binFilesCell.appendChild(toggleButton);
+        
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'bin-details';
+        // Usar HTMLElement para garantir que style exista
+        (detailsDiv as HTMLElement).style.display = 'none';
+        
+        const filesList = document.createElement('ul');
+        game.binFiles.forEach(file => {
+          const listItem = document.createElement('li');
+          listItem.textContent = file.name;
+          filesList.appendChild(listItem);
+        });
+        
+        detailsDiv.appendChild(filesList);
+        binFilesCell.appendChild(detailsDiv);
+        
+        toggleButton.addEventListener('click', () => {
+          // Usar HTMLElement para garantir que style exista
+          const details = detailsDiv as HTMLElement;
+          if (details.style.display === 'none') {
+            details.style.display = 'block';
+            toggleButton.textContent = 'Ocultar detalhes';
+          } else {
+            details.style.display = 'none';
+            toggleButton.textContent = 'Mostrar detalhes';
+          }
+        });
+      }
+    } else {
+      binFilesCell.textContent = 'Nenhum';
+    }
     row.appendChild(binFilesCell);
     
     // Coluna: Novo Nome BIN
     const binNameCell = document.createElement('td');
-    binNameCell.textContent = game.binFileName || 'N/A';
+    if (game.binFileName) {
+      binNameCell.textContent = game.binFileName;
+      binNameCell.className = 'new-bin-name';
+    } else {
+      binNameCell.textContent = 'N/A';
+    }
     row.appendChild(binNameCell);
     
     // Coluna: Status
     const statusCell = document.createElement('td');
-    statusCell.className = `status-${game.status}`;
-    statusCell.textContent = getStatusText(game.status);
-    const statusMessage = document.createElement('div');
-    statusMessage.className = 'status-message';
-    statusMessage.textContent = game.message;
-    statusCell.appendChild(statusMessage);
+    statusCell.className = `status-cell status-${game.status}`;
+    
+    const statusIcon = document.createElement('span');
+    statusIcon.className = 'status-icon';
+    switch (game.status) {
+      case 'success':
+        statusIcon.innerHTML = '✅';
+        break;
+      case 'error':
+        statusIcon.innerHTML = '❌';
+        break;
+      case 'pending':
+        statusIcon.innerHTML = '⚠️';
+        break;
+      default:
+        statusIcon.innerHTML = '🔄';
+    }
+    statusCell.appendChild(statusIcon);
+    
+    const statusText = document.createElement('span');
+    statusText.className = 'status-text';
+    statusText.textContent = getStatusText(game.status);
+    statusCell.appendChild(statusText);
+    
+    if (game.message) {
+      const statusMessage = document.createElement('div');
+      statusMessage.className = 'status-message';
+      statusMessage.textContent = game.message;
+      statusCell.appendChild(statusMessage);
+    }
+    
     row.appendChild(statusCell);
     
     // Coluna: Ações
     const actionsCell = document.createElement('td');
+    actionsCell.className = 'actions-cell';
     
     if (game.status !== 'error' && game.binFile.size > 0) {
       const downloadButton = document.createElement('button');
       downloadButton.textContent = 'Baixar BIN';
-      downloadButton.className = 'action-button';
+      downloadButton.className = 'action-button download-bin';
       downloadButton.addEventListener('click', () => {
         saveAs(game.binFile, game.binFileName);
       });
@@ -178,7 +247,7 @@ function updateResultsUI(games: ProcessedGame[]) {
       if (game.cueFile) {
         const downloadCueButton = document.createElement('button');
         downloadCueButton.textContent = 'Baixar CUE';
-        downloadCueButton.className = 'action-button';
+        downloadCueButton.className = 'action-button download-cue';
         downloadCueButton.addEventListener('click', () => {
           saveAs(game.cueFile as Blob, game.cueFile?.name);
         });
@@ -225,7 +294,7 @@ function showProcessingInstructions(games: ProcessedGame[]) {
       </ul>
     </ol>
     <p><strong>Resumo das alterações:</strong></p>
-    <ul>
+    <ul class="changes-summary">
       ${successGames.map(game => 
         `<li>
           <strong>${game.originalFolder}:</strong> 

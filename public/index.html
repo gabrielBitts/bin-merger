@@ -3,26 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerenciador de Arquivos Saturn BIN/CUE</title>
+  <title>Gerenciador de Arquivos BIN/CUE</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      max-width: 1000px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
     }
     
     h1, h2 {
       text-align: center;
+      color: #2c3e50;
+    }
+    
+    h1 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 2.2em;
+    }
+    
+    h2 {
+      font-size: 1.8em;
+      margin-top: 30px;
     }
     
     .container {
       margin-top: 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
     }
     
     .upload-section {
       text-align: center;
       margin-bottom: 30px;
+      padding: 20px;
+      background-color: #f0f7ff;
+      border-radius: 8px;
+    }
+    
+    .upload-section p {
+      font-size: 1.1em;
+      margin-bottom: 15px;
     }
     
     #folder-input {
@@ -30,96 +56,223 @@
     }
     
     button {
-      padding: 10px 20px;
-      background-color: #4CAF50;
+      padding: 12px 24px;
+      background-color: #3498db;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       margin: 5px;
+      font-size: 1em;
+      transition: background-color 0.2s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
     button:hover {
-      background-color: #45a049;
+      background-color: #2980b9;
     }
     
     .action-button {
-      padding: 5px 10px;
+      padding: 8px 12px;
       font-size: 0.9em;
+      margin: 3px;
+    }
+    
+    .download-bin {
+      background-color: #27ae60;
+    }
+    
+    .download-bin:hover {
+      background-color: #219653;
+    }
+    
+    .download-cue {
+      background-color: #f39c12;
+    }
+    
+    .download-cue:hover {
+      background-color: #d35400;
+    }
+    
+    .toggle-button {
+      background-color: #95a5a6;
+      padding: 5px 10px;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+    
+    .toggle-button:hover {
+      background-color: #7f8c8d;
     }
     
     #progress-bar {
       width: 100%;
+      height: 15px;
       margin: 20px 0;
+      border-radius: 10px;
     }
     
     .results-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
     }
     
     .results-table th, .results-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 12px;
       text-align: left;
     }
     
     .results-table th {
-      background-color: #f2f2f2;
-      font-weight: bold;
+      background-color: #3498db;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      letter-spacing: 0.5px;
     }
     
     .results-table tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f5f9fc;
+    }
+    
+    .results-table tr:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .bin-count {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .bin-details {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .bin-details ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .bin-details li {
+      font-size: 0.9em;
+      margin-bottom: 3px;
+      word-break: break-all;
+    }
+    
+    .new-bin-name {
+      font-weight: bold;
+      color: #2980b9;
+    }
+    
+    .status-cell {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .status-icon {
+      font-size: 1.2em;
+      margin-right: 5px;
+    }
+    
+    .status-text {
+      font-weight: bold;
+      margin-top: 3px;
     }
     
     .status-success {
-      color: green;
+      color: #27ae60;
     }
     
     .status-error {
-      color: red;
+      color: #e74c3c;
     }
     
     .status-pending {
-      color: orange;
+      color: #f39c12;
     }
     
     .status-processing {
-      color: blue;
+      color: #3498db;
     }
     
     .status-message {
-      font-size: 0.8em;
+      font-size: 0.85em;
       margin-top: 5px;
+      color: #7f8c8d;
+    }
+    
+    .actions-cell {
+      text-align: center;
     }
     
     #instructions {
       margin-top: 30px;
-      padding: 15px;
-      background-color: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      padding: 20px;
+      background-color: #f0f7ff;
+      border: 1px solid #d1e3fa;
+      border-radius: 8px;
+      line-height: 1.6;
     }
     
     .limitation-notice {
       background-color: #fff3cd;
       border: 1px solid #ffeeba;
       color: #856404;
-      padding: 10px;
+      padding: 15px;
       margin: 20px 0;
-      border-radius: 4px;
+      border-radius: 8px;
+      font-size: 1.05em;
+      line-height: 1.5;
     }
     
     .error {
-      color: red;
+      color: #e74c3c;
       font-weight: bold;
+    }
+    
+    .changes-summary {
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .changes-summary li {
+      margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .results-table th, .results-table td {
+        padding: 8px;
+        font-size: 0.9em;
+      }
+      
+      button {
+        padding: 10px 16px;
+      }
+      
+      .action-button {
+        padding: 6px 10px;
+        font-size: 0.8em;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Gerenciador de Arquivos Saturn BIN/CUE</h1>
+  <h1>Gerenciador de Arquivos BIN/CUE</h1>
   
   <div class="limitation-notice">
     <strong>Limitação Importante:</strong> Devido a restrições de segurança dos navegadores, esta aplicação web não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituir os originais manualmente.
@@ -127,7 +280,7 @@
   
   <div class="container">
     <div class="upload-section">
-      <p>Selecione a pasta raiz contendo as pastas de jogos do Saturn:</p>
+      <p>Selecione a pasta raiz contendo as pastas de jogos:</p>
       <input type="file" id="folder-input" webkitdirectory directory multiple>
       <button id="process-button">Selecionar Pasta</button>
     </div>
