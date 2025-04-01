@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "dev": "webpack serve --mode development"
+    "dev": "webpack serve --mode development",
+    "deploy": "npm run build && gh-pages -d ."
   },
   "keywords": [
     "bin",
@@ -19,6 +20,7 @@
     "@types/file-saver": "^2.0.5",
     "@types/node": "^18.11.18",
     "copy-webpack-plugin": "^11.0.0",
+    "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
