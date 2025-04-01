@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Arquivos Saturn BIN/CUE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1, h2 {
+      text-align: center;
+    }
+    
+    .container {
+      margin-top: 30px;
+    }
+    
+    .upload-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    #folder-input {
+      display: none;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .action-button {
+      padding: 5px 10px;
+      font-size: 0.9em;
+    }
+    
+    #progress-bar {
+      width: 100%;
+      margin: 20px 0;
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .results-table th, .results-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .results-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    
+    .results-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .status-success {
+      color: green;
+    }
+    
+    .status-error {
+      color: red;
+    }
+    
+    .status-pending {
+      color: orange;
+    }
+    
+    .status-processing {
+      color: blue;
+    }
+    
+    .status-message {
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+    
+    #instructions {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerenciador de Arquivos Saturn BIN/CUE</h1>
+  
+  <div class="container">
+    <div class="upload-section">
+      <p>Selecione a pasta raiz contendo as pastas de jogos do Saturn:</p>
+      <input type="file" id="folder-input" webkitdirectory directory multiple>
+      <button id="process-button">Selecionar Pasta</button>
+    </div>
+    
+    <progress id="progress-bar" max="100" value="0"></progress>
+    
+    <div id="results-list"></div>
+    
+    <div id="instructions"></div>
+  </div>
+  
+  <script src="bundle.js"></script>
+</body>
+</html> 
