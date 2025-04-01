@@ -7,6 +7,7 @@ let processButton: HTMLButtonElement;
 let resultsList: HTMLDivElement;
 let progressBar: HTMLProgressElement;
 let instructionsDiv: HTMLDivElement;
+let processedGames: ProcessedGame[] = [];
 
 // Inicializa a aplicação quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,10 +30,14 @@ function initializeUI() {
 
 // Configura os event listeners
 function setupEventListeners() {
+  // Quando o botão é clicado, limpa o input anterior e abre o seletor de arquivos
   processButton.addEventListener('click', () => {
+    // Limpa o valor do input para garantir que o evento change seja acionado mesmo se o mesmo diretório for selecionado
+    folderInput.value = '';
     folderInput.click();
   });
   
+  // Processa os arquivos assim que forem selecionados
   folderInput.addEventListener('change', handleFolderSelection);
 }
 
@@ -44,13 +49,14 @@ function showInitialInstructions() {
     <p><strong>Importante:</strong> Devido a restrições de segurança dos navegadores, esta ferramenta não pode modificar arquivos diretamente no seu sistema. Você precisará baixar os arquivos processados e substituí-los manualmente.</p>
     <ol>
       <li>Clique em "Selecionar Pasta" e escolha a pasta raiz que contém suas pastas de jogos do Saturn</li>
-      <li>A ferramenta analisará todas as subpastas e processará os arquivos BIN/CUE</li>
-      <li>Baixe os arquivos processados e substitua os originais manualmente</li>
+      <li>A ferramenta analisará todas as subpastas e processará os arquivos BIN/CUE automaticamente</li>
+      <li>Baixe os arquivos processados usando os botões "Baixar BIN"</li>
+      <li>Substitua manualmente os arquivos originais pelos processados</li>
     </ol>
   `;
 }
 
-// Manipula a seleção de pastas
+// Manipula a seleção de pastas e processa os arquivos
 async function handleFolderSelection(event: Event) {
   const input = event.target as HTMLInputElement;
   
@@ -58,16 +64,22 @@ async function handleFolderSelection(event: Event) {
     return;
   }
   
+  // Limpa os resultados anteriores
+  processedGames = [];
+  resultsList.innerHTML = '';
+  
   // Mostra a barra de progresso
   progressBar.style.display = 'block';
   progressBar.value = 0;
-  resultsList.innerHTML = '';
+  
+  // Limpa as instruções anteriores
+  instructionsDiv.innerHTML = '<p>Processando arquivos...</p>';
   
   try {
     console.log(`Total de arquivos selecionados: ${input.files.length}`);
     
     // Processa as pastas de jogos
-    const processedGames = await processGameFolders(input.files);
+    processedGames = await processGameFolders(input.files);
     
     console.log(`Jogos processados: ${processedGames.length}`);
     
@@ -79,6 +91,7 @@ async function handleFolderSelection(event: Event) {
   } catch (error) {
     console.error('Erro ao processar as pastas:', error);
     alert(`Erro ao processar as pastas: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    instructionsDiv.innerHTML = `<p class="error">Erro ao processar as pastas: ${error instanceof Error ? error.message : 'Erro desconhecido'}</p>`;
   } finally {
     // Esconde a barra de progresso
     progressBar.style.display = 'none';
@@ -87,6 +100,9 @@ async function handleFolderSelection(event: Event) {
 
 // Atualiza a interface com os resultados
 function updateResultsUI(games: ProcessedGame[]) {
+  // Limpa os resultados anteriores
+  resultsList.innerHTML = '';
+  
   if (games.length === 0) {
     resultsList.innerHTML = '<p>Nenhum jogo encontrado nas subpastas. Certifique-se de selecionar a pasta raiz que contém as pastas de jogos.</p>';
     return;
@@ -199,10 +215,14 @@ function showProcessingInstructions(games: ProcessedGame[]) {
     <p>Foram encontrados ${games.length} jogos, dos quais ${successGames.length} foram processados com sucesso.</p>
     <p><strong>Como aplicar as alterações:</strong></p>
     <ol>
-      <li>Baixe os arquivos BIN processados clicando nos botões "Baixar BIN"</li>
-      <li>Navegue até a pasta original de cada jogo no seu sistema</li>
-      <li>Substitua os arquivos BIN originais pelo arquivo BIN processado</li>
-      <li>Se necessário, renomeie o arquivo CUE para corresponder ao novo nome do arquivo BIN</li>
+      <li>Baixe os arquivos individualmente usando os botões "Baixar BIN"</li>
+      <li>Para cada jogo:</li>
+      <ul>
+        <li>Navegue até a pasta original do jogo no seu sistema</li>
+        <li>Exclua todos os arquivos BIN originais</li>
+        <li>Coloque o novo arquivo BIN mesclado na pasta</li>
+        <li>Certifique-se de que o arquivo CUE aponta para o novo arquivo BIN</li>
+      </ul>
     </ol>
     <p><strong>Resumo das alterações:</strong></p>
     <ul>
